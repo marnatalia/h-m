@@ -207,11 +207,11 @@ In which HappyPath do the applicants drop the most? Please write SQL queries bel
 
 ```sql
 select 
-    f.last_newhappypath, 
-    f.count_last_newhappypath, 
-    f.newhappypathfunnel, 
-    cast(ifnull((1- lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc)/ f.newhappypathfunnel)*100,'') 
-        as decimal(10,2)) as drop_percent
+    f.last_newhappypath as status, 
+    -- f.count_last_newhappypath as count_current_newhappypath, 
+    f.newhappypathfunnel as count_apps, 
+    lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc) as reached_next_status,
+    cast(ifnull((1- lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc)/ f.newhappypathfunnel)*100,'') as decimal(10,2)) as drop_percent
 from 
     (
     select 
@@ -239,18 +239,19 @@ from
 At 70.75% Happy Path 1 has the the highest applicants drop rate. 
 
 
-|last_newhappypath|count_last_newhappypath|newhappypathfunnel|drop_percent|
+|status|count_apps|reached_next_status|drop_percent|
 |---|---|---|---|
-|1|3421|4835|70.75|
-|2|809|1414|57.21|
-|3|114|605|18.84|
-|4|90|491|18.33|
-|5|128|401|31.92|
-|6|29|273|10.62|
-|7|11|244|4.51|
-|8|15|233|6.44|
-|9|5|218|2.29|
-|10|213|213|0|
+|1|4835|1414|70.75|
+|2|1414|605|57.21|
+|3|605|491|18.84|
+|4|491|401|18.33|
+|5|401|273|31.92|
+|6|273|244|10.62|
+|7|244|233|4.51|
+|8|233|218|6.44|
+|9|218|213|2.29|
+|10|213||0|
+
 
 
 
