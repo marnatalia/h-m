@@ -6,10 +6,7 @@
 ### Question 1. 
 
 To link two tables together, we need a mapping table.
-(1) Use your judgment based on the similarity of descriptions in campaign_name in
-SocialChannelAdSpend and <campaign_month, campaign_group> in SocialChannelConversion
-to come up with a mapping table. Your mapping table will have 3 columns, < campaign_name,
-campaign_month, campaign_group >.
+(1) Use your judgment based on the similarity of descriptions in campaign_name in SocialChannelAdSpend and <campaign_month, campaign_group> in SocialChannelConversion to come up with a mapping table. Your mapping table will have 3 columns, < campaign_name, campaign_month, campaign_group >.
 (2) Write the mapping table to the database.
 
 #### SQL Code: 
@@ -51,10 +48,7 @@ inner join hm_socialchannelconversions as cc
 
 ### Question 2.
 
-With the help of the mapping table you saved to the database, calculate cost per applied,
-cost per offered, cost per offer accepted, and cost per funded loan at the campaign level.
-Please write down the SQL queries you used. The goal here is to generate a summary table
-with campaign_name and all of our cpc metrics: cpa, cpo, cpoa, and cpfl.
+With the help of the mapping table you saved to the database, calculate cost per applied, cost per offered, cost per offer accepted, and cost per funded loan at the campaign level. Please write down the SQL queries you used. The goal here is to generate a summary table with campaign_name and all of our cpc metrics: cpa, cpo, cpoa, and cpfl.
 
 #### SQL Code
 
@@ -112,11 +106,7 @@ with campaign_name and all of our cpc metrics: cpa, cpo, cpoa, and cpfl.
 
 ### Question 3. 
 
-Now that we have key CPC metrics like CPFL, we would like to use Tableau to visualize
-data. At minimum, the dashboard we want consists of summary table of cpc metrics we just
-generated, including cpa, cpo, cpoa, and cpfl by Campaign. Extra point: plots of the daily
-cumulative spend by campaign (either faceted by campaign or sharing the same plot, where
-each campaign has a trace)
+Now that we have key CPC metrics like CPFL, we would like to use Tableau to visualize data. At minimum, the dashboard we want consists of summary table of cpc metrics we just generated, including cpa, cpo, cpoa, and cpfl by Campaign. Extra point: plots of the daily cumulative spend by campaign (either faceted by campaign or sharing the same plot, where each campaign has a trace)
 
 #### Tableau Report
 
@@ -165,4 +155,51 @@ What is the conversion rate from HappyPath1 to HappyPath5 by each application cr
 |2015-01-02	| 56 |
 |2015-01-03	| 218 |
 |2015-01-04	| 127 |
+
+### Question 5
+
+In which HappyPath do the applicants drop the most? Please write SQL queries below.
+
+```sql
+select 
+    f.last_newhappypath, 
+    f.count_last_newhappypath, 
+    f.newhappypathfunnel, 
+    cast(ifnull(((f.newhappypathfunnel - lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc))/ f.newhappypathfunnel)*100,'') as decimal(10,2)) as drop_percent
+from 
+(select 
+      cp.last_newhappypath, 
+      cp.count_last_newhappypath,
+      sum( cp.count_last_newhappypath) over( order by cp.last_newhappypath desc) as newhappypathfunnel
+    from 
+      (select 
+          m.last_newhappypath, count(1) as count_last_newhappypath 
+       from 
+          (select
+              h.APPLICATION_ID,
+              max(h.NEWHAPPYPATH) as last_newhappypath
+           from hm_application_status_history as h
+           group by h.APPLICATION_ID
+           ) as m group by m.last_newhappypath
+      ) as cp order by cp.last_newhappypath
+) as f order by f.last_newhappypath
+```
+
+Answer: At 70.75% Happy Path 1 has the the highest applicants drop rate. 
+
+|last_newhappypath|count_last_newhappypath|newhappypathfunnel|drop_percent|
+|---|---|---|---|
+|1|3421|4835|70.75|
+|2|809|1414|57.21|
+|3|114|605|18.84|
+|4|90|491|18.33|
+|5|128|401|31.92|
+|6|29|273|10.62|
+|7|11|244|4.51|
+|8|15|233|6.44|
+|9|5|218|2.29|
+|10|213|213|0|
+
+
+
 
