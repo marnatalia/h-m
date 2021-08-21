@@ -15,7 +15,7 @@ campaign_month, campaign_group >.
 #### SQL Code: 
 
 ```sql
-create table hm_MappingTable as
+create table hm_mappingyable as
 select distinct 
     ca.campaign_name, 
     cc.campaign_month, 
@@ -28,6 +28,24 @@ inner join hm_socialchannelconversions as cc
     replace(replace(concat(left(ca.campaign_name,4),substring(ca.campaign_name,29 )),'-','_'),' ','')
     order by ca.campaign_name 
 ```
+
+#### Mapping Table:
+
+|campaign_name|campaign_month|campaign_group|
+|---|---|---|
+|1808 Social Channel - Group 1a|201808|group_1a|
+|1808 Social Channel - Group 1b|201808|group_1b|
+|1808 Social Channel - Group 2|201808|group_2|
+|1808 Social Channel - Group 3a|201808|group_3a|
+|1808 Social Channel - Group 3b|201808|group_3b|
+|1808 Social Channel - Group 3c|201808|group_3c|
+|1808 Social Channel - Group 3d|201808|group_3d|
+|1809 Social Channel - Group 3a-1|201809|group_3a_1|
+|1809 Social Channel - Group 3b-1|201809|group_3b_1|
+|1809 Social Channel - Group 3c-1|201809|group_3c_1|
+|1809 Social Channel - Group 3d-1|201809|group_3d_1|
+|1809 Social Channel - Group 3s -2|201809|group_3s_2|
+|1809 Social Channel - Group 4|201809|group_4|
 
 
 
@@ -42,33 +60,53 @@ with campaign_name and all of our cpc metrics: cpa, cpo, cpoa, and cpfl.
 
 ```sql
     select 
-        m.campaign_name, 
-        s.totalspend as TotalSpend,
-        round(s.totalspend/cp.applied,2) as CPA, 
-        round(s.totalspend/cp.offered,2) as CPO, 
-        round(s.totalspend/cp.offeraccepted,2) as CPOA, 
-        round(s.totalspend/cp.funded,2) as CPF   
-    from hm_MappingTable as m
-    left join 
+    m.campaign_name, 
+    s.totalspend as totalspend,
+    round(s.totalspend/cp.applied,2) as cpa, 
+    round(s.totalspend/cp.offered,2) as cpo, 
+    round(s.totalspend/cp.offeraccepted,2) as cpoa, 
+    round(s.totalspend/cp.funded,2) as cpf   
+  from hm_mappingtable as m
+  left join 
     (
-        select 
-            ca.campaign_name, 
-            sum(ca.spend) as totalspend 
-        from hm_SocialChannelAdSpend as ca
-        group by ca.campaign_name
-    ) as s on m.campaign_name = s.campaign_name    
-    left join 
+    select 
+        ca.campaign_name, 
+        sum(ca.spend) as totalspend 
+    from hm_socialchanneladspend as ca
+    group by ca.campaign_name
+    ) as s on m.campaign_name = s.campaign_name
+    
+  left join 
     (
-        select 
-            concat(cc.campaign_month,cc.campaign_group ) as campaignkey, 
-            sum(cc.applied) as applied, 
-            sum(cc.offered) as offered, 
-            sum(cc.offer_accepted) as offeraccepted, 
-            sum(cc.funded) as funded 
-        from hm_SocialChannelConversions as cc
-        group by concat(cc.campaign_month,cc.campaign_group)
+    select 
+        concat(cc.campaign_month,cc.campaign_group ) as campaignkey, 
+        sum(cc.applied) as applied, 
+        sum(cc.offered) as offered, 
+        sum(cc.offer_accepted) as offeraccepted, 
+        sum(cc.funded) as funded 
+    from hm_socialchannelconversions as cc
+    group by concat(cc.campaign_month,cc.campaign_group)
     ) as cp on cp.campaignkey = concat(m.campaign_month,m.campaign_group)
 ```
+
+### Table With Performance Metrics and Tptal Spend
+
+|campaign_name|totalspend|cpa|cpo|cpoa|cpf|
+|---|---|---|---|---|---|
+|1808 Social Channel - Group 1a|7817|38.51|59.22|139.59|260.57|
+|1808 Social Channel - Group 1b|4363|38.96|58.17|189.7|872.6|
+|1808 Social Channel - Group 2|8508|61.65|102.51|243.09|500.47|
+|1808 Social Channel - Group 3a|5057|3.09|5.69|14.21|28.41|
+|1808 Social Channel - Group 3b|11063|26.53|39.09|124.3|257.28|
+|1808 Social Channel - Group 3c|6955|44.87|67.52|204.56|409.12|
+|1808 Social Channel - Group 3d|6000|142.86|193.55|461.54|750|
+|1809 Social Channel - Group 3a-1|4339|10.28|14.91|42.96|83.44|
+|1809 Social Channel - Group 3b-1|3220|31.57|48.06|153.33|402.5|
+|1809 Social Channel - Group 3c-1|26783|393.87|569.85|1071.32|2678.3|
+|1809 Social Channel - Group 3d-1|8190|431.05|630|1638|4095|
+|1809 Social Channel - Group 3s -2|7116|11.84|17.88|53.91|124.84|
+|1809 Social Channel - Group 4|4428|8.86|18.45|45.18|116.53|
+
 
 
 
@@ -91,14 +129,14 @@ By each application created date, how many of the applicants reach HappyPath 5?
 
 ```sql
  select 
-    date_format(h.APPLICATION_CREATED ,'%Y-%m-%d') as ApplicationCreated,
-    sum(case when h.NEWHAPPYPATH = 5 then 1 else 0 end) as CountStatus_5
- from hm_Application_Status_History as h
- group by date_format(h.APPLICATION_CREATED,'%Y-%m-%d')
- order by date_format(h.APPLICATION_CREATED,'%Y-%m-%d')
+    date_format(h.application_created ,'%y-%m-%d') as applicationcreated,
+    sum(case when h.newhappypath = 5 then 1 else 0 end) as happypath_5
+ from hm_application_status_history as h
+ group by date_format(h.application_created,'%y-%m-%d')
+ order by date_format(h.application_created,'%y-%m-%d')
 ```
 
-|ApplicationCreated	| CountStatus_5 |
+|applicationcreated	| happypath_5 |
 |---|---|
 |2015-01-02	| 56 |
 |2015-01-03	| 218 |
@@ -107,22 +145,22 @@ By each application created date, how many of the applicants reach HappyPath 5?
 What is the conversion rate from HappyPath1 to HappyPath5 by each application created date?
 
 ```sql
- select ap.ApplicationCreated, count(1) as Conversion_1_5
+ select ap.applicationcreated, count(1) as conversion_1_5
  from 
  (
      select 
-         date_format(h.APPLICATION_CREATED,'%Y-%m-%d') as ApplicationCreated, 
-         h.APPLICATION_ID,   
-         count(1) as CountRecords
-     from hm_Application_Status_History as h 
-         where h.NEWHAPPYPATH<=5 and h.NEWHAPPYPATH>1
-     group by date_format(h.APPLICATION_CREATED,'%Y-%m-%d'),h.APPLICATION_ID
+         date_format(h.application_created,'%y-%m-%d') as applicationcreated, 
+         h.application_id,   
+         count(1) as countrecords
+     from hm_application_status_history as h 
+         where h.newhappypath<=5 and h.newhappypath>1
+     group by date_format(h.application_created,'%y-%m-%d'),h.application_id
  ) as ap
- where ap.CountRecords=4
- group by ap.ApplicationCreated
+ where ap.countrecords=4
+ group by ap.applicationcreated
 ```
 
-|ApplicationCreated	| Conversion_1_5 |
+|applicationcreated	| conversion_1_5 |
 |---|---|
 |2015-01-02	| 56 |
 |2015-01-03	| 218 |
