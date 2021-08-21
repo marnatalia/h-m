@@ -19,11 +19,11 @@ select distinct
     cc.campaign_group
 from hm_socialchanneladspend as ca
 inner join hm_socialchannelconversions as cc 
-    on 
-    concat(right(cc.campaign_month,4),substring(cc.campaign_group,7)) 
-    = 
-    replace(replace(concat(left(ca.campaign_name,4),substring(ca.campaign_name,29 )),'-','_'),' ','')
-    order by ca.campaign_name 
+on 
+concat(right(cc.campaign_month,4),substring(cc.campaign_group,7)) 
+= 
+replace(replace(concat(left(ca.campaign_name,4),substring(ca.campaign_name,29 )),'-','_'),' ','')
+order by ca.campaign_name 
 ```
 
 #### Mapping Table:
@@ -53,7 +53,7 @@ With the help of the mapping table you saved to the database, calculate cost per
 #### SQL Code
 
 ```sql
-    select 
+  select 
     m.campaign_name, 
     s.totalspend as totalspend,
     round(s.totalspend/cp.applied,2) as cpa, 
@@ -68,7 +68,8 @@ With the help of the mapping table you saved to the database, calculate cost per
         sum(ca.spend) as totalspend 
     from hm_socialchanneladspend as ca
     group by ca.campaign_name
-    ) as s on m.campaign_name = s.campaign_name
+    ) as s 
+  on m.campaign_name = s.campaign_name
     
   left join 
     (
@@ -80,7 +81,8 @@ With the help of the mapping table you saved to the database, calculate cost per
         sum(cc.funded) as funded 
     from hm_socialchannelconversions as cc
     group by concat(cc.campaign_month,cc.campaign_group)
-    ) as cp on cp.campaignkey = concat(m.campaign_month,m.campaign_group)
+    ) as cp 
+  on cp.campaignkey = concat(m.campaign_month,m.campaign_group)
 ```
 
 ### Table With Performance Metrics and Tptal Spend
@@ -140,43 +142,61 @@ By each application created date, how many of the applicants reach HappyPath 5?
 
 What is the conversion rate from HappyPath1 to HappyPath5 by each application created date?
 
-Answer: 401 / 4835 = 8.29%
 
 #### SQL Code: 
 
 ```sql
  select 
-    f.last_newhappypath, 
-    f.newhappypathfunnel,
-    round((f.newhappypathfunnel / lead(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc))*100,2) 
-    as conversion_percent_1_5
-from 
-(
-select 
-      cp.last_newhappypath, 
-      cp.count_last_newhappypath,
-      sum( cp.count_last_newhappypath) over( order by cp.last_newhappypath desc) as newhappypathfunnel
+    f1.dateappcreated,
+    f1.path_5_appcount,
+    f1.path_1_appcount,
+    f1.conversion_percent_1_5
+ from 
+     (
+     select 
+        f.last_newhappypath, 
+        f.dateappcreated,
+        f.newhappypathfunnel as path_5_appcount,
+        lead(f.newhappypathfunnel,1) over (partition by f.dateappcreated order by f.last_newhappypath desc) as path_1_appcount,
+        round((f.newhappypathfunnel / lead(f.newhappypathfunnel,1) over (partition by f.dateappcreated order by f.last_newhappypath desc))*100,2) 
+        as conversion_percent_1_5
     from 
-      (
-      select 
-          m.last_newhappypath, count(1) as count_last_newhappypath 
-       from 
+    (
+    select 
+          cp.last_newhappypath, 
+          cp.count_last_newhappypath,
+          cp.dateappcreated,
+          sum( cp.count_last_newhappypath) over( partition by cp.dateappcreated order by cp.last_newhappypath desc  ) as newhappypathfunnel
+    from 
           (
-          select
-              h.APPLICATION_ID,
-              max(h.NEWHAPPYPATH) as last_newhappypath
-           from hm_application_status_history as h
-           group by h.APPLICATION_ID
-           ) as m group by m.last_newhappypath
-      ) as cp  order by cp.last_newhappypath 
-) as f where f.last_newhappypath in (1,5) order by f.last_newhappypath
+          select 
+              m.last_newhappypath, count(1) as count_last_newhappypath, m.dateappcreated
+          from 
+              (
+              select
+                  h.APPLICATION_ID,
+                  max(h.NEWHAPPYPATH) as last_newhappypath,
+                  date_format(h.application_created,'%Y-%m-%d') as dateappcreated
+               from hm_application_status_history as h
+               group by h.APPLICATION_ID, date_format(h.application_created,'%y-%m-%d')
+               ) as m
+          group by m.last_newhappypath, m.dateappcreated
+          ) as cp  
+          order by cp.last_newhappypath 
+    ) as f 
+    where f.last_newhappypath in (1,5) 
+    order by  f.dateappcreated, f.last_newhappypath
+) as f1 
+where f1.last_newhappypath = 5
 ```
 
 
-|last_newhappypath	|newhappypathfunnel	|conversion_percent_1_5|
-|---|---|---|
-|1	|4835	| |
-|5	|401	|8.29|
+|dateappcreated	|path_5_appcount	|path_1_appcount	|conversion_percent_1_5|
+|---|---|---|---|
+|2015-01-02	|56	|784	|7.14|
+|2015-01-03	|218	|2502	|8.71|
+|2015-01-04	|127	|1549	|8.20|
+
 
 
 ### Question 5
@@ -190,27 +210,30 @@ select
     f.last_newhappypath, 
     f.count_last_newhappypath, 
     f.newhappypathfunnel, 
-    cast(ifnull(((f.newhappypathfunnel - lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc))/ f.newhappypathfunnel)*100,'') as decimal(10,2)) as drop_percent
+    cast(ifnull((1- lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc)/ f.newhappypathfunnel)*100,'') 
+        as decimal(10,2)) as drop_percent
 from 
-(
-select 
-      cp.last_newhappypath, 
-      cp.count_last_newhappypath,
-      sum( cp.count_last_newhappypath) over( order by cp.last_newhappypath desc) as newhappypathfunnel
-    from 
-      (
-      select 
-          m.last_newhappypath, count(1) as count_last_newhappypath 
-       from 
+    (
+    select 
+          cp.last_newhappypath, 
+          cp.count_last_newhappypath,
+          sum( cp.count_last_newhappypath) over( order by cp.last_newhappypath desc) as newhappypathfunnel
+      from 
           (
-          select
-              h.APPLICATION_ID,
-              max(h.NEWHAPPYPATH) as last_newhappypath
-           from hm_application_status_history as h
-           group by h.APPLICATION_ID
-           ) as m group by m.last_newhappypath
-      ) as cp order by cp.last_newhappypath
-) as f order by f.last_newhappypath
+            select 
+                  m.last_newhappypath, count(1) as count_last_newhappypath 
+             from 
+                (
+                 select 
+                        h.APPLICATION_ID,
+                        max(h.NEWHAPPYPATH) as last_newhappypath
+                   from hm_application_status_history as h
+                 group by h.APPLICATION_ID
+                ) as m 
+            group by m.last_newhappypath
+          ) as cp 
+    order by cp.last_newhappypath
+    ) as f order by f.last_newhappypath
 ```
 
 At 70.75% Happy Path 1 has the the highest applicants drop rate. 
