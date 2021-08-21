@@ -102,3 +102,46 @@ each campaign has a trace)
 ![image](https://user-images.githubusercontent.com/88731258/130311066-55c45b12-d2bf-4559-b20e-295e0d288433.png)
 
 
+### Question 4.
+
+By each application created date, how many of the applicants reach HappyPath 5?
+
+```sql
+ select 
+    date_format(h.APPLICATION_CREATED ,'%Y-%m-%d') as ApplicationCreated,
+    sum(case when h.NEWHAPPYPATH = 5 then 1 else 0 end) as CountStatus_5
+ from hm_Application_Status_History as h
+ group by date_format(h.APPLICATION_CREATED,'%Y-%m-%d')
+ order by date_format(h.APPLICATION_CREATED,'%Y-%m-%d')
+```
+
+|ApplicationCreated	| CountStatus_5 |
+|---|---|
+|2015-01-02	| 56 |
+|2015-01-03	| 218 |
+|2015-01-04	| 127 |
+
+What is the conversion rate from HappyPath1 to HappyPath5 by each application created date?
+
+```sql
+ select ap.ApplicationCreated, count(1) as Conversion_1_5
+ from 
+ (
+     select 
+         date_format(h.APPLICATION_CREATED,'%Y-%m-%d') as ApplicationCreated, 
+         h.APPLICATION_ID,   
+         count(1) as CountRecords
+     from hm_Application_Status_History as h 
+         where h.NEWHAPPYPATH<=5 and h.NEWHAPPYPATH>1
+     group by date_format(h.APPLICATION_CREATED,'%Y-%m-%d'),h.APPLICATION_ID
+ ) as ap
+ where ap.CountRecords=4
+ group by ap.ApplicationCreated
+```
+
+|ApplicationCreated	| Conversion_1_5 |
+|---|---|
+|2015-01-02	| 56 |
+|2015-01-03	| 218 |
+|2015-01-04	| 127 |
+
