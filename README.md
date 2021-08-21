@@ -129,7 +129,6 @@ By each application created date, how many of the applicants reach HappyPath 5?
  order by date_format(h.application_created,'%y-%m-%d')
 ```
 
-#### Result: 
 
 |applicationcreated	| happypath_5 |
 |---|---|
@@ -141,29 +140,44 @@ By each application created date, how many of the applicants reach HappyPath 5?
 
 What is the conversion rate from HappyPath1 to HappyPath5 by each application created date?
 
+Answer: 401 / 4835 = 8.29%
+
 #### SQL Code: 
 
 ```sql
- select ap.applicationcreated, count(1) as conversion_1_5
- from 
- (
-     select 
-         date_format(h.application_created,'%y-%m-%d') as applicationcreated, 
-         h.application_id,   
-         count(1) as countrecords
-     from hm_application_status_history as h 
-         where h.newhappypath<=5 and h.newhappypath>1
-     group by date_format(h.application_created,'%y-%m-%d'),h.application_id
- ) as ap
- where ap.countrecords=4
- group by ap.applicationcreated
+ select 
+    f.last_newhappypath, 
+    f.newhappypathfunnel,
+    round((f.newhappypathfunnel / lead(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc))*100,2) 
+    as conversion_percent_1_5
+from 
+(
+select 
+      cp.last_newhappypath, 
+      cp.count_last_newhappypath,
+      sum( cp.count_last_newhappypath) over( order by cp.last_newhappypath desc) as newhappypathfunnel
+    from 
+      (
+      select 
+          m.last_newhappypath, count(1) as count_last_newhappypath 
+       from 
+          (
+          select
+              h.APPLICATION_ID,
+              max(h.NEWHAPPYPATH) as last_newhappypath
+           from hm_application_status_history as h
+           group by h.APPLICATION_ID
+           ) as m group by m.last_newhappypath
+      ) as cp  order by cp.last_newhappypath 
+) as f where f.last_newhappypath in (1,5) order by f.last_newhappypath
 ```
 
-|applicationcreated	| conversion_1_5 |
-|---|---|
-|2015-01-02	| 56 |
-|2015-01-03	| 218 |
-|2015-01-04	| 127 |
+
+|last_newhappypath	|newhappypathfunnel	|conversion_percent_1_5|
+|---|---|---|
+|1	|4835	| |
+|5	|401	|8.29|
+
 
 ### Question 5
 
@@ -176,18 +190,20 @@ select
     f.last_newhappypath, 
     f.count_last_newhappypath, 
     f.newhappypathfunnel, 
-    cast(ifnull(((f.newhappypathfunnel - lag(f.newhappypathfunnel,1) 
-    over (order by f.last_newhappypath desc)) / f.newhappypathfunnel)*100,'') as decimal(10,2)) as drop_percent
+    cast(ifnull(((f.newhappypathfunnel - lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc))/ f.newhappypathfunnel)*100,'') as decimal(10,2)) as drop_percent
 from 
-(select 
+(
+select 
       cp.last_newhappypath, 
       cp.count_last_newhappypath,
       sum( cp.count_last_newhappypath) over( order by cp.last_newhappypath desc) as newhappypathfunnel
     from 
-      (select 
+      (
+      select 
           m.last_newhappypath, count(1) as count_last_newhappypath 
        from 
-          (select
+          (
+          select
               h.APPLICATION_ID,
               max(h.NEWHAPPYPATH) as last_newhappypath
            from hm_application_status_history as h
@@ -199,7 +215,6 @@ from
 
 At 70.75% Happy Path 1 has the the highest applicants drop rate. 
 
-#### Result: 
 
 |last_newhappypath|count_last_newhappypath|newhappypathfunnel|drop_percent|
 |---|---|---|---|
