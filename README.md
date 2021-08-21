@@ -1,5 +1,6 @@
 # Marketing Campaign Analysis
 
+
 ## Question 1. 
 
 To link two tables together, we need a mapping table.
@@ -8,6 +9,8 @@ SocialChannelAdSpend and <campaign_month, campaign_group> in SocialChannelConver
 to come up with a mapping table. Your mapping table will have 3 columns, < campaign_name,
 campaign_month, campaign_group >.
 (2) Write the mapping table to the database.
+
+#### SQL Code: 
 
 ```sql
 CREATE TABLE HM_MAPPINGTABLE AS
@@ -25,12 +28,15 @@ INNER JOIN HM_SOCIALCHANNELCONVERSIONS AS CC
 ```
 
 
+
 ## Question 2.
 
 With the help of the mapping table you saved to the database, calculate cost per applied,
 cost per offered, cost per offer accepted, and cost per funded loan at the campaign level.
 Please write down the SQL queries you used. The goal here is to generate a summary table
 with campaign_name and all of our cpc metrics: cpa, cpo, cpoa, and cpfl.
+
+#### SQL Code
 
 ```sql
     SELECT M.CAMPAIGN_NAME, 
@@ -79,6 +85,8 @@ with campaign_name and all of our cpc metrics: cpa, cpo, cpoa, and cpfl.
     ) AS CP ON CP.CAMPAIGNKEY = CONCAT(M.CAMPAIGN_MONTH,M.CAMPAIGN_GROUP)
 ```
 
+
+
 ## Question 3. 
 
 Now that we have key CPC metrics like CPFL, we would like to use Tableau to visualize
@@ -86,5 +94,9 @@ data. At minimum, the dashboard we want consists of summary table of cpc metrics
 generated, including cpa, cpo, cpoa, and cpfl by Campaign. Extra point: plots of the daily
 cumulative spend by campaign (either faceted by campaign or sharing the same plot, where
 each campaign has a trace)
+
+#### Tableau Report
+
+![image](https://user-images.githubusercontent.com/88731258/130311066-55c45b12-d2bf-4559-b20e-295e0d288433.png)
 
 
