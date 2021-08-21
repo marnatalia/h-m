@@ -113,9 +113,12 @@ Now that we have key CPC metrics like CPFL, we would like to use Tableau to visu
 ![image](https://user-images.githubusercontent.com/88731258/130311066-55c45b12-d2bf-4559-b20e-295e0d288433.png)
 
 
+
 ### Question 4.
 
 By each application created date, how many of the applicants reach HappyPath 5?
+
+#### SQL Code: 
 
 ```sql
  select 
@@ -126,13 +129,19 @@ By each application created date, how many of the applicants reach HappyPath 5?
  order by date_format(h.application_created,'%y-%m-%d')
 ```
 
+#### Result: 
+
 |applicationcreated	| happypath_5 |
 |---|---|
 |2015-01-02	| 56 |
 |2015-01-03	| 218 |
 |2015-01-04	| 127 |
 
+
+
 What is the conversion rate from HappyPath1 to HappyPath5 by each application created date?
+
+#### SQL Code: 
 
 ```sql
  select ap.applicationcreated, count(1) as conversion_1_5
@@ -160,12 +169,15 @@ What is the conversion rate from HappyPath1 to HappyPath5 by each application cr
 
 In which HappyPath do the applicants drop the most? Please write SQL queries below.
 
+#### SQL Code: 
+
 ```sql
 select 
     f.last_newhappypath, 
     f.count_last_newhappypath, 
     f.newhappypathfunnel, 
-    cast(ifnull(((f.newhappypathfunnel - lag(f.newhappypathfunnel,1) over (order by f.last_newhappypath desc))/ f.newhappypathfunnel)*100,'') as decimal(10,2)) as drop_percent
+    cast(ifnull(((f.newhappypathfunnel - lag(f.newhappypathfunnel,1) 
+    over (order by f.last_newhappypath desc)) / f.newhappypathfunnel)*100,'') as decimal(10,2)) as drop_percent
 from 
 (select 
       cp.last_newhappypath, 
@@ -185,7 +197,9 @@ from
 ) as f order by f.last_newhappypath
 ```
 
-Answer: At 70.75% Happy Path 1 has the the highest applicants drop rate. 
+At 70.75% Happy Path 1 has the the highest applicants drop rate. 
+
+#### Result: 
 
 |last_newhappypath|count_last_newhappypath|newhappypathfunnel|drop_percent|
 |---|---|---|---|
