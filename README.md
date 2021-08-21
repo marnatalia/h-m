@@ -1,7 +1,9 @@
-# Marketing Campaign Analysis
+# BI Analyst Data Challenge
 
 
-## Question 1. 
+## Part 1. Marketing Campaign Analysis
+
+### Question 1. 
 
 To link two tables together, we need a mapping table.
 (1) Use your judgment based on the similarity of descriptions in campaign_name in
@@ -29,7 +31,7 @@ INNER JOIN HM_SOCIALCHANNELCONVERSIONS AS CC
 
 
 
-## Question 2.
+### Question 2.
 
 With the help of the mapping table you saved to the database, calculate cost per applied,
 cost per offered, cost per offer accepted, and cost per funded loan at the campaign level.
@@ -87,7 +89,7 @@ with campaign_name and all of our cpc metrics: cpa, cpo, cpoa, and cpfl.
 
 
 
-## Question 3. 
+### Question 3. 
 
 Now that we have key CPC metrics like CPFL, we would like to use Tableau to visualize
 data. At minimum, the dashboard we want consists of summary table of cpc metrics we just
