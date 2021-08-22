@@ -1,3 +1,4 @@
+
 # BI Analyst Data Challenge
 
 
@@ -120,19 +121,28 @@ Now that we have key CPC metrics like CPFL, we would like to use Tableau to visu
 
 By each application created date, how many of the applicants reach HappyPath 5?
 
+*Assumption: All the stages from 1 to 5 must be passed within the same application created date*
+
 #### SQL Code: 
 
 ```sql
- select 
-    date_format(h.application_created ,'%y-%m-%d') as applicationcreated,
-    sum(case when h.newhappypath = 5 then 1 else 0 end) as happypath_5
- from hm_application_status_history as h
- group by date_format(h.application_created,'%y-%m-%d')
- order by date_format(h.application_created,'%y-%m-%d')
+ select ap.applicationcreated, count(1) as countapplicants_1_5
+ from 
+ (
+     select 
+         date_format(h.application_created,'%y-%m-%d') as applicationcreated, 
+         h.application_id,   
+         count(1) as countrecords
+     from hm_application_status_history as h 
+         where h.newhappypath<=5 and h.newhappypath>1
+     group by date_format(h.application_created,'%y-%m-%d'),h.application_id
+ ) as ap
+ where ap.countrecords=4
+ group by ap.applicationcreated 
 ```
 
 
-|applicationcreated	| happypath_5 |
+|applicationcreated	| countapplicants_1_5 |
 |---|---|
 |2015-01-02	| 56 |
 |2015-01-03	| 218 |
@@ -253,6 +263,61 @@ At 70.75% Happy Path 1 has the the highest applicants drop rate.
 |10|213||0|
 
 
+### Question 6.
+If we define 90% applications from old status to new status (the next status) as mature, how long does each status take to get matured (in days)? For example, it takes X days for 90% of applicants to reach HappyPath N from HappyPath N-1.
+
+*Assumption 1.*
+
+#### SQL Code: 
+
+```sql
+select c.newhappypath, round(avg(c.date_difference)/1440,2) as average_conversion_in_days_90
+from 
+(
+    select  
+    a.application_id, a.newhappypath, a.date_difference,
+    
+    -- calculating row number for each applicants for each group of happy path 
+    -- sorted by date difference between current and previous statuses
+    
+    row_number() over (partition by a.NEWHAPPYPATH order by date_difference, a.CREATEDDATE ) as row_num,
+    
+    -- calculating total number of applicants for each happy path 
+    
+    count(1) over (partition by a.NEWHAPPYPATH) as total_apps_per_status,
+    
+    -- determine applicant position in set of applicants within each happy path for further elimination of the "slowest" 10%
+    
+    row_number() over (partition by a.NEWHAPPYPATH order by date_difference, a.CREATEDDATE ) / 
+    count(1) over (partition by a.NEWHAPPYPATH)*100 as percent_of_total_per_path   
+    from 
+        (   
+        -- calculating date difference between current and previous statuses        
+        select 
+             h.application_id, h.newhappypath, 
+             h.createddate,
+             lag(h.createddate,1) over (partition by h.application_id order by h.newhappypath ) as prev_status_created,
+             timestampdiff(minute,lag(h.createddate,1) over (partition by h.application_id order by h.newhappypath ),h.createddate) 
+             as date_difference            
+        from hm_application_status_history as h 
+        ) as a
+        where a.date_difference is not null 
+) as c 
+where c.percent_of_total_per_path<=90     -- selecting "fastest" 90% of aplicants for each happy path value
+group by c.newhappypath
+```
+
+|newhappypath|average_conversion_in_days_90|
+|---|---|
+|2|0|
+|3|0.2|
+|4|0|
+|5|0.04|
+|6|2.59|
+|7|0.01|
+|8|0|
+|9|0.34|
+|10|0|
 
 
 
