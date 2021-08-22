@@ -213,6 +213,8 @@ where f1.last_newhappypath = 5
 
 In which HappyPath do the applicants drop the most? Please write SQL queries below.
 
+Answer: At 70.75% Happy Path 1 has the the highest applicants drop rate. 
+
 #### SQL Code: 
 
 ```sql
@@ -245,8 +247,6 @@ from
     order by cp.last_newhappypath
     ) as f order by f.last_newhappypath
 ```
-
-At 70.75% Happy Path 1 has the the highest applicants drop rate. 
 
 
 |status|count_apps|reached_next_status|drop_percent|
@@ -307,7 +307,7 @@ where c.percent_of_total_per_path<=90     -- selecting "fastest" 90% of aplicant
 group by c.newhappypath
 ```
 
-|newhappypath|average_conversion_in_days_90|
+|newhappypath|average_conversion_in_days|
 |---|---|
 |2|0|
 |3|0.2|
