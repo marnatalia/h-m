@@ -325,7 +325,7 @@ group by c.newhappypath
 
 Build visualizations of Q1 and Q2 using R or Python. Transform the table if needed.
 
-#### Metrics Table
+#### Metrics Table from Q2
 
 ![image](https://user-images.githubusercontent.com/88731258/130367572-cc1ea975-f53c-4424-812f-f7fa969e6948.png)
 
