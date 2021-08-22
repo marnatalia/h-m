@@ -266,8 +266,6 @@ from
 ### Question 6.
 If we define 90% applications from old status to new status (the next status) as mature, how long does each status take to get matured (in days)? For example, it takes X days for 90% of applicants to reach HappyPath N from HappyPath N-1.
 
-*Assumption 1.*
-
 #### SQL Code: 
 
 ```sql
