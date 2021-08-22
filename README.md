@@ -10,6 +10,8 @@ To link two tables together, we need a mapping table.
 (1) Use your judgment based on the similarity of descriptions in campaign_name in SocialChannelAdSpend and <campaign_month, campaign_group> in SocialChannelConversion to come up with a mapping table. Your mapping table will have 3 columns, < campaign_name, campaign_month, campaign_group >.
 (2) Write the mapping table to the database.
 
+MySQL database was used for this assignment. 
+
 #### SQL Code: 
 
 ```sql
@@ -116,6 +118,7 @@ Now that we have key CPC metrics like CPFL, we would like to use Tableau to visu
 ![image](https://user-images.githubusercontent.com/88731258/130311066-55c45b12-d2bf-4559-b20e-295e0d288433.png)
 
 
+##Part 2: Application Funnel Analysis
 
 ### Question 4.
 
