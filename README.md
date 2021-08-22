@@ -272,7 +272,7 @@ If we define 90% applications from old status to new status (the next status) as
 #### SQL Code: 
 
 ```sql
-select c.newhappypath, round(avg(c.date_difference)/1440,2) as average_conversion_in_days_90
+select c.newhappypath, round(avg(c.date_difference)/1440,4) as average_conversion_in_days_90
 from 
 (
     select  
@@ -311,14 +311,15 @@ group by c.newhappypath
 |newhappypath|average_conversion_in_days|
 |---|---|
 |2|0|
-|3|0.2|
-|4|0|
-|5|0.04|
-|6|2.59|
-|7|0.01|
-|8|0|
-|9|0.34|
-|10|0|
+|3|0.203|
+|4|0.0016|
+|5|0.0352|
+|6|2.5899|
+|7|0.0129|
+|8|0.0003|
+|9|0.3439|
+|10|0.0002|
+
 
 
 
