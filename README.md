@@ -325,44 +325,17 @@ group by c.newhappypath
 
 Build visualizations of Q1 and Q2 using R or Python. Transform the table if needed.
 
-#### Metrics Table from Q2
+#### Metrics Table from Q2. Built in R
 
-![image](https://user-images.githubusercontent.com/88731258/130367572-cc1ea975-f53c-4424-812f-f7fa969e6948.png)
-
-#### R Code: 
-
-```R
-y1<-metrics$cpf
-y2<-metrics$cpoa
-y3<-metrics$cpo
-y4<-metrics$cpa
-plot(x, y1, col = "blue", pch = 20, xlim = c(0,0))
-points(x, y2, col = "red", pch = 20)
-points(x, y3, col = "green", pch = 20)
-points(x, y4, col = "orange", pch = 20)
-library(ggplot2)
-df <- data.frame(x, y1, y2, y3, y4)
-ggplot(df, aes(x, y = value, color = variable)) + 
-    geom_point(aes(y = y1, col = "CPF")) + 
-    geom_point(aes(y = y2, col = "CPOA")) +
-    geom_point(aes(y = y3, col = "CPO")) +
-    geom_point(aes(y = y3, col = "CPA")) +
-    scale_x_discrete(guide = guide_axis(angle = 45))
-
-```
+![image](https://user-images.githubusercontent.com/88731258/130373046-a5f39c66-d988-49bf-a638-f71678d1dd88.png)
 
 
-#### Visual of Total Spend 
+#### Visual of Total Spend. Built in R
 
 ![image](https://user-images.githubusercontent.com/88731258/130369479-c2879585-42f3-43dd-8f3e-0c0987ea5479.png)
 
-#### R Code
 
-```R
-ggplot(dfts,aes(x = reorder(x,-ts), ts)) + scale_x_discrete(guide = guide_axis(angle = 45)) + 
-geom_bar(stat="identity", fill="lightblue")+theme_minimal() + 
-geom_text(aes(label=ts), vjust=1.6, color="black", size=3) + 
-labs(x ="Campaign", y = "Total Spend") +
-ggtitle("Total Spend Per Campaign") +
-theme(plot.title = element_text(hjust = 0.5))
-```
+#### Visual for Conversion in Days for each Happy Path. Built in R
+
+![image](https://user-images.githubusercontent.com/88731258/130373366-db4a4267-478b-4bad-bbab-595e79679977.png)
+
