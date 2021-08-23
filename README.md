@@ -118,7 +118,7 @@ Now that we have key CPC metrics like CPFL, we would like to use Tableau to visu
 ![image](https://user-images.githubusercontent.com/88731258/130311066-55c45b12-d2bf-4559-b20e-295e0d288433.png)
 
 
-##Part 2: Application Funnel Analysis
+## Part 2: Application Funnel Analysis
 
 ### Question 4.
 
