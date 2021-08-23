@@ -327,15 +327,15 @@ Build visualizations of Q1 and Q2 using R or Python. Transform the table if need
 
 #### Metrics Table from Q2. Built in R
 
-![image](https://user-images.githubusercontent.com/88731258/130373046-a5f39c66-d988-49bf-a638-f71678d1dd88.png)
+![image](https://user-images.githubusercontent.com/88731258/130383689-29c4b502-327b-431d-9bad-c3d49af39039.png)
 
 
 #### Visual of Total Spend. Built in R
 
-![image](https://user-images.githubusercontent.com/88731258/130369479-c2879585-42f3-43dd-8f3e-0c0987ea5479.png)
+![image](https://user-images.githubusercontent.com/88731258/130383155-4f96800c-578e-4442-a5fc-b7ffc256bdb1.png)
 
 
 #### Visual for Conversion in Days for each Happy Path. Built in R
 
-![image](https://user-images.githubusercontent.com/88731258/130373366-db4a4267-478b-4bad-bbab-595e79679977.png)
+![image](https://user-images.githubusercontent.com/88731258/130382911-f4af0623-1ff4-40c0-9fe6-cdf5be894193.png)
 
