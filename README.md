@@ -275,7 +275,7 @@ If we define 90% applications from old status to new status (the next status) as
 #### SQL Code: 
 
 ```sql
-select c.newhappypath, round(avg(c.date_difference)/1440,4) as average_conversion_in_days_90
+select c.newhappypath, round(avg(c.date_difference)/1440,4) as average_conversion_in_days
 from 
 (
     select  
