@@ -11,6 +11,7 @@ To link two tables together, we need a mapping table.
 (2) Write the mapping table to the database.
 
 MySQL database was used for this assignment. 
+*Assumption: Campaigns with the word "Test" -  are separate campaigns. For example 1809 Social Channel - Group 2 - Test 1 is not equivalent to <201809, group_2_1>*
 
 #### SQL Code: 
 
